@@ -12,29 +12,37 @@ echo "==> Installing nginx"
 apt-get update -y
 apt-get install -y nginx unzip curl ca-certificates
 
-echo "==> Downloading preview"
-mkdir -p /var/www/latent-field
-rm -rf /var/www/latent-field/*
-ZIP_OK=0
+echo "==> Downloading site"
+TMP=/tmp/latent-field-site.tar.gz
+rm -f "$TMP"
+OK=0
 for url in \
-  "https://ghfast.top/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.zip" \
-  "https://ghproxy.net/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.zip" \
-  "https://gh-proxy.com/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.zip" \
-  "https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.zip"
+  "https://ghfast.top/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz" \
+  "https://ghproxy.net/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz" \
+  "https://gh-proxy.com/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz" \
+  "https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz"
 do
   echo "Trying: $url"
-  if curl -fL --retry 1 --connect-timeout 10 --max-time 90 "$url" -o /tmp/latent-field-preview.zip; then
-    ZIP_OK=1
+  if curl -fL --retry 1 --connect-timeout 10 --max-time 120 "$url" -o "$TMP"; then
+    OK=1
     break
   fi
 done
 
-if [ "$ZIP_OK" -ne 1 ]; then
-  echo "Failed to download preview zip."
+if [ "$OK" -ne 1 ]; then
+  echo "Failed to download site archive."
   exit 1
 fi
 
-unzip -oq /tmp/latent-field-preview.zip -d /var/www/latent-field
+echo "==> Extracting"
+rm -rf /var/www/latent-field
+mkdir -p /var/www/latent-field
+tar -xzf "$TMP" -C /var/www/latent-field
+
+if [ ! -f /var/www/latent-field/index.html ]; then
+  echo "index.html missing after extract."
+  exit 1
+fi
 chown -R www-data:www-data /var/www/latent-field
 
 echo "==> Configuring nginx"
@@ -46,12 +54,16 @@ server {
     root /var/www/latent-field;
     index index.html;
 
-    location / {
-        try_files $uri $uri/ =404;
+    charset utf-8;
+
+    location /_astro/ {
+        try_files $uri =404;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000, immutable";
     }
 
-    location = /404.html {
-        internal;
+    location / {
+        try_files $uri $uri/ =404;
     }
 
     error_page 404 /404.html;
@@ -67,4 +79,5 @@ systemctl restart nginx
 
 echo "==> Health check"
 curl -sI http://127.0.0.1/ | head -n 1
+curl -s http://127.0.0.1/ | grep -o '<title>[^<]*</title>' | head -n 1
 echo "DONE: http://119.91.193.252/"
