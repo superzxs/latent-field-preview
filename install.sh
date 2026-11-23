@@ -17,10 +17,13 @@ mkdir -p /var/www/latent-field
 rm -rf /var/www/latent-field/*
 ZIP_OK=0
 for url in \
-  "https://cdn.jsdelivr.net/gh/superzxs/latent-field-preview@main/latent-field-preview.zip" \
+  "https://ghfast.top/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.zip" \
+  "https://ghproxy.net/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.zip" \
+  "https://gh-proxy.com/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.zip" \
   "https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.zip"
 do
-  if curl -fL --retry 3 --connect-timeout 15 "$url" -o /tmp/latent-field-preview.zip; then
+  echo "Trying: $url"
+  if curl -fL --retry 1 --connect-timeout 10 --max-time 90 "$url" -o /tmp/latent-field-preview.zip; then
     ZIP_OK=1
     break
   fi
