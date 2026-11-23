@@ -17,9 +17,9 @@ TMP=/tmp/latent-field-site.tar.gz
 rm -f "$TMP"
 OK=0
 for url in \
+  "https://gh-proxy.com/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz" \
   "https://ghfast.top/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz" \
   "https://ghproxy.net/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz" \
-  "https://gh-proxy.com/https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz" \
   "https://raw.githubusercontent.com/superzxs/latent-field-preview/main/latent-field-preview.tar.gz"
 do
   echo "Trying: $url"
